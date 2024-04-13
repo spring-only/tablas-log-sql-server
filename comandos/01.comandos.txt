@@ -1,0 +1,95 @@
+/* -------------------------------------------------------------------------- */
+/*  Script creado con fines didácticos. Adecuar para caso real de producción  */
+/*                       Comandos válidos para Windows                        */
+/* -------------------------------------------------------------------------- */
+
+
+/* -------------------------------------------------------------------------- */
+-- Caso Cliente: SQL Server Management Studio
+/* -------------------------------------------------------------------------- */
+Login:      LgnTemporal
+Password:   P@ssw0rd1234
+Application Name=Desde SSMS
+
+INSERT INTO persona (nombres, apellidos, lugar_nacimiento, estado_civil, fecha_modificacion) 
+VALUES('Yasmin (SSMS)', 'Zamora Santana', 'San Juan', 'Soltero', '2000-01-01');
+
+UPDATE persona SET estado_civil = 'Casado',                             fecha_modificacion = '2021-04-19' WHERE id =  1;
+
+UPDATE persona SET nombres = 'Yazmín', lugar_nacimiento = 'San Pedro',  fecha_modificacion = '2022-07-30' WHERE id =  1;
+
+UPDATE persona SET estado_civil = 'Divorciado',                         fecha_modificacion = '2023-09-09' WHERE id =  1;
+
+DELETE persona WHERE id =  1;
+
+
+SELECT * FROM persona ORDER BY id, fecha_modificacion;
+SELECT * FROM persona_log ORDER BY fecha_ocurrencia;
+EXEC sp_who2
+
+
+
+
+
+/* -------------------------------------------------------------------------- */
+-- Caso Cliente: Razor SQL
+/* -------------------------------------------------------------------------- */
+Login:      LgnTemporal
+Password:   P@ssw0rd1234
+applicationName=Desde Razor SQL
+
+INSERT INTO persona (nombres, apellidos, lugar_nacimiento, estado_civil, fecha_modificacion) 
+VALUES('Yasmin (Razor SQL)', 'Zamora Santana', 'San Juan', 'Soltero', '2000-01-01');
+
+SELECT * FROM persona ORDER BY id, fecha_modificacion;
+SELECT * FROM persona_log ORDER BY fecha_ocurrencia;
+EXEC sp_who2
+
+
+
+
+
+
+
+/* -------------------------------------------------------------------------- */
+-- Caso Cliente: SQLCMD (pipeline)
+/* -------------------------------------------------------------------------- */
+sqlcmd -S localhost -U LgnTemporal -P P@ssw0rd1234 -H "Desde SQLCMD"
+
+INSERT INTO persona (nombres, apellidos, lugar_nacimiento, estado_civil, fecha_modificacion) VALUES('Yasmin (SQLCMD)', 'Zamora Santana', 'San Juan', 'Soltero', '2000-01-01');
+
+SELECT * FROM persona ORDER BY id, fecha_modificacion;
+SELECT * FROM persona_log ORDER BY fecha_ocurrencia;
+EXEC sp_who2
+
+
+
+
+
+/* -------------------------------------------------------------------------- */
+-- Caso Cliente: Jar
+/* -------------------------------------------------------------------------- */
+
+-- Ubicarse en la ruta donde está el pom.xml
+
+-- Adecuar el ./src/main/resources/application.properties de ser el caso
+
+-- Compilar el proyecto
+mvn clean package
+
+-- Ejecutar el jar con la aplicación por defecto
+java -jar ./target/tablaslog-0.0.1-SNAPSHOT.jar
+
+-- Ejecutar el jar con otro nombre de aplicación, sobreescribiendo lo del properties y con otra cantidad de conexiones a la base de datos iniciales
+java -Dspring.datasource.hikari.minimum-idle=5 -Dspring.datasource.url="jdbc:sqlserver://localhost;database=DBIDENTIDAD;encrypt=true;trustServerCertificate=true;applicationName=Nombre sobreescrito por comando" -jar ./target/tablaslog-0.0.1-SNAPSHOT.jar
+
+
+-- Invocar el endpoint que crea un registro
+curl -X POST http://localhost:8080/api/persons -H "Content-Type: application/json" -d "{\"nombres\": \"Gina\", \"apellidos\": \"Cabrera\", \"lugarNacimiento\": \"Callao\", \"estadoCivil\": \"SOL\", \"fechaModificacion\": \"2000-07-01T05:00:00.000+00:00\"}"
+
+-- Invocar el endpoint que consulta todos los registros
+curl -X GET  http://localhost:8080/api/persons -H "Content-Type: application/json"
+
+SELECT * FROM persona ORDER BY id, fecha_modificacion;
+SELECT * FROM persona_log ORDER BY fecha_ocurrencia;
+EXEC sp_who2
